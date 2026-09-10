@@ -22,7 +22,7 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 class FaceDetectorAnalyzer(
     private val onFrameResult: (FrameResult) -> Unit,
     private val onError: (Exception) -> Unit = {},
-    private val analyzeEveryNFrames: Int = 1 // tune this: lower = more responsive, higher = better battery
+    private val analyzeEveryNFrames: Int = 3 // tune this: lower = more responsive, higher = better battery
 ) : ImageAnalysis.Analyzer {
 
     private val options = FaceDetectorOptions.Builder()
@@ -64,8 +64,20 @@ class FaceDetectorAnalyzer(
                 // crash or return garbage the first time something downstream actually calls it.
                 // Only pay the YUV->RGB cost when there's more than one face - requires
                 // camera-core 1.3+ for ImageProxy.toBitmap().
+                //
+                // IMPORTANT: imageProxy.toBitmap() returns the RAW sensor buffer, unrotated -
+                // but the face bounding boxes above were computed against InputImage's
+                // rotated width/height. Cropping the raw bitmap with those coordinates would
+                // be misaligned, so rotate the bitmap here to match the same space the boxes
+                // are in before handing it downstream (e.g. to MemeGenerator).
                 val bitmap: android.graphics.Bitmap? =
-                    if (faceDataList.size > 1) runCatching { imageProxy.toBitmap() }.getOrNull()
+                    if (faceDataList.size > 1) runCatching {
+                        val raw = imageProxy.toBitmap()
+                        if (rotation != 0) {
+                            val matrix = android.graphics.Matrix().apply { postRotate(rotation.toFloat()) }
+                            android.graphics.Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, matrix, true)
+                        } else raw
+                    }.getOrNull()
                     else null
 
                 onFrameResult(FrameResult(faceDataList, frameWidth, frameHeight) { bitmap })
@@ -80,7 +92,7 @@ class FaceDetectorAnalyzer(
     private fun Face.toFaceData(frameWidth: Int, frameHeight: Int, timestampMs: Long): FaceData {
         val box = boundingBox
         val relativeSize = (box.width().toFloat() * box.height().toFloat()) /
-            (frameWidth.toFloat() * frameHeight.toFloat())
+                (frameWidth.toFloat() * frameHeight.toFloat())
 
         return FaceData(
             faceId = trackingId ?: -1,

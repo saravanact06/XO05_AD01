@@ -1,68 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-<<<<<<< HEAD
-
-=======
-<uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
->>>>>>> 8c5c67d (Proper working demo has been made)
-    <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-<<<<<<< HEAD
-        android:theme="@style/Theme.ShoulderGuard">
-=======
-        android:theme="@style/Theme.ThambiThappu">
->>>>>>> 8c5c67d (Proper working demo has been made)
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-<<<<<<< HEAD
-            android:theme="@style/Theme.ShoulderGuard"
-=======
-            android:theme="@style/Theme.ThambiThappu"
->>>>>>> 8c5c67d (Proper working demo has been made)
-            android:windowSoftInputMode="adjustResize">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
+    <application android:allowBackup="true" android:dataExtractionRules="@xml/data_extraction_rules" android:fullBackupContent="@xml/backup_rules" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/Theme.ThambiThappu">
+        <activity android:name=".MainActivity" android:exported="true" android:label="@string/app_name" android:theme="@style/Theme.ThambiThappu" android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service android:name=".ProtectionService" android:foregroundServiceType="camera" android:exported="false"/>
     </application>
-
-<<<<<<< HEAD
-
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <!-- Declares the device must have a camera; without "required=false" a phone with no
-         camera can't install the app at all - fine for this problem statement, but flag it. -->
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-feature android:name="android.hardware.camera.front" android:required="true" />
-
-    <!--
-      NOT yours to add, but you'll need to merge these in from teammates - listing them here
-      so the manifest doesn't turn into a merge-conflict surprise on day 2:
-
-      <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />        (overlay/blur)
-      <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />         (background monitoring)
-      <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />  (API 34+ requires this
-           specific foreground service TYPE permission when a foreground service uses the camera -
-           worth raising with whoever owns the Foreground Service now, it's an easy thing to miss
-           and it silently breaks on newer Android versions if forgotten)
-      <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
-           tools:ignore="ProtectedPermissions" />                                      (foreground-app detection,
-           if the team goes with UsageStats instead of AccessibilityService as suggested above)
-    -->
-
-
-=======
->>>>>>> 8c5c67d (Proper working demo has been made)
 </manifest>

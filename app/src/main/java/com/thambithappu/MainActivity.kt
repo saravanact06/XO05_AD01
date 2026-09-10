@@ -26,23 +26,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Screen { Home, Demo }
-
 @Composable
 fun ThambiThappuApp() {
-    var screen by remember { mutableStateOf(Screen.Home) }
     var settings by remember { mutableStateOf(ProtectionSettings()) }
 
-    when (screen) {
-        Screen.Home -> HomeScreen(
-            settings = settings,
-            onSettingsChange = { settings = it },
-            onOpenDemo = { screen = Screen.Demo },
-            onSettingsClick = { /* full settings screen not built yet - hook up later */ }
-        )
-        Screen.Demo -> ProtectedDemoScreen(
-            settings = settings,
-            onExit = { screen = Screen.Home }
-        )
-    }
+    HomeScreen(
+        settings = settings,
+        onSettingsChange = {
+            settings = it
+            ProtectionSettingsHolder.current = it
+        }
+    )
 }

@@ -7,10 +7,14 @@ sealed class ThreatEvent {
     object Peek3Meme : ThreatEvent()
 }
 
+/** [peekerFace] is set whenever [event] is anything other than Clear - it's whichever
+ *  stranger face was actually judged attentive, so the caller can crop a photo of them. */
+data class RiskFrameResult(val event: ThreatEvent, val peekerFace: FaceData?)
+
 /**
  * Turns a stream of analyzed frames into discrete "someone is peeking" events, with
  * escalation across repeated peeks:
- *   1st sustained peek -> warning popup (Continue / Protect)
+ *   1st sustained peek -> warning
  *   2nd sustained peek -> stronger warning, protection applied automatically
  *   3rd+ sustained peek -> meme warning, protection applied automatically
  *
@@ -25,8 +29,8 @@ sealed class ThreatEvent {
  */
 class RiskEngine(
     private val ownerCalibration: OwnerCalibration = OwnerCalibration(),
-    private val requiredPersistenceMs: Long = 200L,
-    private val resolveAfterMs: Long = 500L
+    private val requiredPersistenceMs: Long = 350L,
+    private val resolveAfterMs: Long = 800L
 ) {
     private var attentiveSinceMs: Long? = null
     private var peekActive = false
@@ -44,11 +48,11 @@ class RiskEngine(
         faces: List<FaceData>,
         sensitivity: Float,
         nowMs: Long = System.currentTimeMillis()
-    ): ThreatEvent {
+    ): RiskFrameResult {
         val (_, strangers) = ownerCalibration.classify(faces)
-        val attentiveStranger = strangers.any { AttentionEngine.isAttentive(it, sensitivity) }
+        val attentiveFace = strangers.firstOrNull { AttentionEngine.isAttentive(it, sensitivity) }
 
-        if (attentiveStranger) {
+        if (attentiveFace != null) {
             lastAttentiveAtMs = nowMs
             if (attentiveSinceMs == null) attentiveSinceMs = nowMs
 
@@ -56,11 +60,12 @@ class RiskEngine(
             if (!peekActive && sustainedFor >= requiredPersistenceMs) {
                 peekActive = true
                 peekCount++
-                return when (peekCount) {
+                val event = when (peekCount) {
                     1 -> ThreatEvent.Peek1Warning
                     2 -> ThreatEvent.Peek2Protect
                     else -> ThreatEvent.Peek3Meme
                 }
+                return RiskFrameResult(event, attentiveFace)
             }
         } else {
             attentiveSinceMs = null
@@ -69,6 +74,6 @@ class RiskEngine(
             }
         }
 
-        return ThreatEvent.Clear
+        return RiskFrameResult(ThreatEvent.Clear, null)
     }
 }
